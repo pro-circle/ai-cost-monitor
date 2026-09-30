@@ -37,7 +37,7 @@ function WhatIfPage() {
 
   const chart = data
     ? [
-        { metric: "Cost ($)", A: data.baseline.result.cost, B: data.scenario.result.cost },
+        { metric: "Cost (₹)", A: data.baseline.result.cost, B: data.scenario.result.cost },
         { metric: "Duration (h)", A: data.baseline.result.durationHours, B: data.scenario.result.durationHours },
         { metric: "GPU hours", A: data.baseline.result.gpuHours, B: data.scenario.result.gpuHours },
       ]
@@ -76,7 +76,7 @@ function WhatIfPage() {
                   <CartesianGrid {...gridProps} />
                   <XAxis dataKey="metric" {...axisProps} />
                   <YAxis {...axisProps} />
-                  <Tooltip {...tooltipStyles} formatter={(v) => Number(v).toFixed(2)} />
+                   <Tooltip {...tooltipStyles} formatter={(v, name, item) => item.payload.metric === "Cost (₹)" ? formatCurrency(Number(v)) : Number(v).toFixed(2)} />
                   <Bar dataKey="A" name="Baseline A" fill={CHART_COLORS[1]} radius={[4, 4, 0, 0]} isAnimationActive={false} />
                   <Bar dataKey="B" name="Scenario B" fill={CHART_COLORS[0]} radius={[4, 4, 0, 0]} isAnimationActive={false} />
                 </BarChart>

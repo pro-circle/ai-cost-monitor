@@ -118,7 +118,7 @@ function GpuAnalyticsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              {["GPU", "VRAM", "$/h", "Jobs", "Avg util", "Peak util", "Mem util", "Avg power", "Temp", "GPU h", "Cost", "Efficiency"].map((h) => (
+              {["GPU", "VRAM", "₹/h", "Jobs", "Avg util", "Peak util", "Mem util", "Avg power", "Temp", "GPU h", "Cost", "Efficiency"].map((h) => (
                 <TableHead key={h}>{h}</TableHead>
               ))}
             </TableRow>

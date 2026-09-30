@@ -7,7 +7,7 @@ import { ErrorBlock, LoadingBlock, PageHeader, Panel, StatTile } from "@/compone
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { fetchCostIntelligence } from "@/lib/api/acg.functions";
 import { filtersKey, useAcgFilters } from "@/lib/filters-store";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { formatCompactCurrency, formatCurrency, formatNumber } from "@/lib/format";
 
 export const Route = createFileRoute("/cost")({
   head: () => ({
@@ -61,7 +61,7 @@ function CostPage() {
             <ComposedChart data={series}>
               <CartesianGrid {...gridProps} />
               <XAxis dataKey="date" {...axisProps} minTickGap={30} />
-              <YAxis {...axisProps} tickFormatter={(v: number) => `$${formatNumber(v / 1000, 0)}k`} />
+               <YAxis {...axisProps} tickFormatter={formatCompactCurrency} />
               <Tooltip {...tooltipStyles} formatter={(v) => (Array.isArray(v) ? v.map((x) => formatCurrency(Number(x))).join(" – ") : formatCurrency(Number(v)))} />
               <Area dataKey="band" name="Range" fill={CHART_COLORS[2]} fillOpacity={0.15} stroke="none" isAnimationActive={false} />
               <Line dataKey="cost" name="Actual" stroke={CHART_COLORS[0]} dot={false} strokeWidth={1.5} isAnimationActive={false} />
@@ -77,7 +77,7 @@ function CostPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={breakdown} layout="vertical" margin={{ left: 20 }}>
                 <CartesianGrid {...gridProps} horizontal={false} vertical />
-                <XAxis type="number" {...axisProps} tickFormatter={(v: number) => `$${formatNumber(v / 1000)}k`} />
+                 <XAxis type="number" {...axisProps} tickFormatter={formatCompactCurrency} />
                 <YAxis type="category" dataKey="category" {...axisProps} width={100} />
                 <Tooltip {...tooltipStyles} formatter={(v) => formatCurrency(Number(v))} />
                 <Bar dataKey="amount" name="Spend" fill={CHART_COLORS[0]} radius={[0, 4, 4, 0]} isAnimationActive={false} />

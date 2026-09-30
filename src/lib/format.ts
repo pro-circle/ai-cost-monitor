@@ -1,11 +1,23 @@
 /**
  * Formatting helpers shared across the UI. Presentation only — all analytics
- * arrive pre-computed from the backend.
+ * arrive pre-computed from the backend. Demo cost values are USD internally;
+ * all money shown to users is converted to INR at a fixed illustrative rate.
  */
 
+export const INR_PER_USD = 83;
+
+export function toRupees(value: number): number {
+  return value * INR_PER_USD;
+}
+
 export function formatCurrency(value: number, digits?: number): string {
-  const d = digits ?? (Math.abs(value) >= 100 ? 0 : Math.abs(value) >= 1 ? 2 : 3);
-  return `$${value.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d })}`;
+  const rupees = toRupees(value);
+  const d = digits ?? (Math.abs(rupees) >= 100 ? 0 : Math.abs(rupees) >= 1 ? 2 : 3);
+  return `₹${rupees.toLocaleString("en-IN", { minimumFractionDigits: d, maximumFractionDigits: d })}`;
+}
+
+export function formatCompactCurrency(value: number): string {
+  return `₹${new Intl.NumberFormat("en-IN", { notation: "compact", maximumFractionDigits: 1 }).format(toRupees(value))}`;
 }
 
 export function formatNumber(value: number, digits = 0): string {
