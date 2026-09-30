@@ -10,6 +10,8 @@ interface MockDataValue {
   clear: () => void;
 }
 
+const FALLBACK: MockDataValue = { loaded: false, ready: false, load: () => {}, clear: () => {} };
+
 const MockDataContext = createContext<MockDataValue | null>(null);
 
 export function MockDataProvider({ children }: { children: ReactNode }) {
@@ -41,6 +43,6 @@ export function MockDataProvider({ children }: { children: ReactNode }) {
 
 export function useMockData() {
   const ctx = useContext(MockDataContext);
-  if (!ctx) throw new Error("useMockData must be used within MockDataProvider");
-  return ctx;
+  // Fallback keeps the page alive if the provider is missing (e.g. mid hot-reload).
+  return ctx ?? FALLBACK;
 }
