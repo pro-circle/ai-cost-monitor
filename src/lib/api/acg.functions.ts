@@ -301,6 +301,7 @@ export const fetchSampleDataset = createServerFn({ method: "POST" })
   .inputValidator((raw: unknown) => z.object({ limit: z.number().int().min(50).max(10000).optional() }).parse(raw ?? {}))
   .handler(async ({ data }) => {
     const jobs = getDataset().jobs.slice(0, data.limit ?? 500);
+    if (jobs.length === 0) throw new Error("No mock data loaded. Press “Load mock data” at the top first.");
     const { headers, rows } = jobsToRows(jobs as unknown as Record<string, unknown>[]);
     const profile = profileDataset(headers, rows);
     return { fileName: "aicomputeguard_training_jobs_sample.csv", headers, rows: rows.slice(0, 25), profile, csv: toCsv(headers, rows) };
