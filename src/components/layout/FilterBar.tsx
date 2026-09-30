@@ -3,6 +3,7 @@ import { Filter, RotateCcw, Search } from "lucide-react";
 
 import { fetchFacets } from "@/lib/api/acg.functions";
 import { useAcgFilters } from "@/lib/filters-store";
+import { INR_PER_USD } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -149,20 +150,20 @@ export function FilterBar() {
         <PopoverContent align="start" className="w-72 space-y-3 p-3">
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
-              <Label className="text-[11px]">Min cost ($)</Label>
+              <Label className="text-[11px]">Min cost (₹)</Label>
               <Input
                 type="number"
-                value={filters.minCost ?? ""}
-                onChange={(e) => patch({ minCost: e.target.value === "" ? null : Number(e.target.value) })}
+                value={filters.minCost == null ? "" : Number((filters.minCost * INR_PER_USD).toFixed(2))}
+                onChange={(e) => patch({ minCost: e.target.value === "" ? null : Number(e.target.value) / INR_PER_USD })}
                 className="h-8"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px]">Max cost ($)</Label>
+              <Label className="text-[11px]">Max cost (₹)</Label>
               <Input
                 type="number"
-                value={filters.maxCost ?? ""}
-                onChange={(e) => patch({ maxCost: e.target.value === "" ? null : Number(e.target.value) })}
+                value={filters.maxCost == null ? "" : Number((filters.maxCost * INR_PER_USD).toFixed(2))}
+                onChange={(e) => patch({ maxCost: e.target.value === "" ? null : Number(e.target.value) / INR_PER_USD })}
                 className="h-8"
               />
             </div>

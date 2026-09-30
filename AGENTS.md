@@ -13,3 +13,4 @@
 - Web app analytics run in TanStack server functions (`src/lib/api/acg.functions.ts`) over the TS engine in `src/lib/engine`; client code imports engine modules as types only — keeps the engine out of the browser bundle.
 - `backend/` is a standalone FastAPI + SQLAlchemy service (SQLite locally, Postgres via docker-compose) mirroring the engine — user runs/tests it outside Lovable.
 - The app starts empty; mock data is served only when the `acg_mock=1` cookie is set by the "Load Mock" button — no database, and the setting stays per browser.
+- Keep demo cost calculations in their original units and convert all user-facing money to INR with one illustrative fixed rate in the shared formatter — avoids inconsistent totals, filters, charts, and insights.

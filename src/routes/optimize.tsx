@@ -75,7 +75,7 @@ function OptimizePage() {
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             <StatTile label="Current cost" value={formatCurrency(r.current.result.cost)} hint={formatHours(r.current.result.durationHours)} />
             <StatTile label="Best cost" value={rec ? formatCurrency(rec.result.cost) : "—"} hint={rec ? formatHours(rec.result.durationHours) : "no cheaper setup"} tone="good" />
-            <StatTile label="Savings" value={rec ? formatCurrency(rec.savings) : "$0"} hint={rec ? `${rec.savingsPct.toFixed(1)}%` : "—"} tone="good" />
+             <StatTile label="Savings" value={formatCurrency(rec?.savings ?? 0)} hint={rec ? `${rec.savingsPct.toFixed(1)}%` : "—"} tone="good" />
             <StatTile label="Duration change" value={rec ? `${rec.durationDeltaPct >= 0 ? "+" : ""}${rec.durationDeltaPct.toFixed(1)}%` : "—"} tone={rec && rec.durationDeltaPct > 0 ? "warn" : "default"} />
             <StatTile label="Setups evaluated" value={String(r.searchSpaceSize)} />
           </div>

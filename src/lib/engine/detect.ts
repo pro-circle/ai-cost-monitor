@@ -3,6 +3,7 @@ import { GPU_CATALOG } from "./constants";
 import { getDataset } from "./dataset";
 import { applyFilters, type Filters } from "./filters";
 import { round } from "./random";
+import { formatCurrency } from "../format";
 import { groupBy, mean, quantile } from "./stats";
 import type { Anomaly, AnomalyKind, Severity, TrainingJob } from "./types";
 
@@ -81,7 +82,7 @@ const KIND_META: Record<AnomalyKind, { metric: string; unit: string; cause: stri
   },
   cost_spike: {
     metric: "Run cost",
-    unit: "$",
+    unit: "₹",
     cause: "Instance class or run duration deviated sharply from the cohort baseline.",
     action: "Review the launch template and check for accidental on-demand premium GPU selection.",
   },
@@ -240,7 +241,7 @@ export function detectAnomalies(filters: Filters, limit = 200) {
         explanation:
           kind === "over_provisioned"
             ? `${job.gpuCount} × ${job.gpuType} sustained only ${(job.gpuUtilization * 100).toFixed(1)}% utilization — scaling efficiency is negative beyond ${Math.max(1, Math.round(job.gpuCount / 2))} devices.`
-            : `${meta.metric} measured ${observed}${meta.unit} against a cohort expectation of ${expectedMin}${meta.unit}–${expectedMax}${meta.unit} for ${job.modelName} ${job.workloadType.toLowerCase()} runs (isolation-forest score ${score.toFixed(3)}, LOF ${lof.toFixed(2)}).`,
+             : `${meta.metric} measured ${kind === "cost_spike" ? formatCurrency(observed) : `${observed}${meta.unit}`} against a cohort expectation of ${kind === "cost_spike" ? `${formatCurrency(expectedMin)}–${formatCurrency(expectedMax)}` : `${expectedMin}${meta.unit}–${expectedMax}${meta.unit}`} for ${job.modelName} ${job.workloadType.toLowerCase()} runs (isolation-forest score ${score.toFixed(3)}, LOF ${lof.toFixed(2)}).`,
         likelyCause: meta.cause,
         recommendation: meta.action,
         estimatedWaste: round(Math.max(0, wasteBase), 2),

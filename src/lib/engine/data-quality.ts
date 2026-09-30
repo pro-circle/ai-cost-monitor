@@ -273,7 +273,7 @@ export function cleanDataset(headers: string[], rows: Row[]): CleaningReport {
     for (const c of numericCols) {
       const v = out[c];
       if (typeof v === "string") {
-        const n = Number(v.replace(/[$,%\s]/g, ""));
+        const n = Number(v.replace(/[$₹,%\s]/g, ""));
         out[c] = Number.isFinite(n) ? n : null;
         coerced += 1;
       }

@@ -26,7 +26,7 @@ import { EmptyState, ErrorBlock, LoadingBlock, Panel, PageHeader, StatTile } fro
 import { Badge } from "@/components/ui/badge";
 import { fetchDashboard } from "@/lib/api/acg.functions";
 import { filtersKey, useAcgFilters } from "@/lib/filters-store";
-import { formatCompact, formatCurrency, formatDate, formatDateTime, formatNumber } from "@/lib/format";
+import { formatCompact, formatCompactCurrency, formatCurrency, formatDate, formatDateTime, formatNumber } from "@/lib/format";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -150,7 +150,7 @@ function DashboardPage() {
               <ComposedChart data={data.costTrend.daily}>
                 <CartesianGrid {...gridProps} />
                 <XAxis dataKey="date" tickFormatter={(v: string) => formatDate(v)} {...axisProps} minTickGap={28} />
-                <YAxis {...axisProps} tickFormatter={(v: number) => `$${formatCompact(v)}`} />
+                <YAxis {...axisProps} tickFormatter={formatCompactCurrency} />
                 <Tooltip {...tooltipStyles} formatter={(value: number, name) => [formatCurrency(value), String(name)]} />
                 <Bar dataKey="cost" name="Spend" fill={CHART_COLORS[0]} radius={[2, 2, 0, 0]} isAnimationActive={false} />
                 <Line
@@ -178,7 +178,7 @@ function DashboardPage() {
               <BarChart data={data.costByGpuType}>
                 <CartesianGrid {...gridProps} />
                 <XAxis dataKey="gpuType" {...axisProps} />
-                <YAxis {...axisProps} tickFormatter={(v: number) => `$${formatCompact(v)}`} />
+                <YAxis {...axisProps} tickFormatter={formatCompactCurrency} />
                 <Tooltip {...tooltipStyles} formatter={(value: number) => formatCurrency(value)} />
                 <Bar dataKey="cost" name="Spend" radius={[3, 3, 0, 0]} isAnimationActive={false}>
                   {data.costByGpuType.map((row, i) => (
@@ -193,7 +193,7 @@ function DashboardPage() {
               <StatTile
                 key={row.gpuType}
                 label={`${row.gpuType} · ${formatNumber(row.jobs)} jobs`}
-                value={`$${row.costPerMillionTokens}/1M tok`}
+                value={`${formatCurrency(row.costPerMillionTokens, 3)}/1M tok`}
                 hint={`${row.avgUtilization}% util · ${formatNumber(row.gpuHours)} GPU-h`}
               />
             ))}
@@ -217,7 +217,7 @@ function DashboardPage() {
                   name="Cost"
                   type="number"
                   {...axisProps}
-                  tickFormatter={(v: number) => `$${formatCompact(v)}`}
+                  tickFormatter={formatCompactCurrency}
                 />
                 <ZAxis dataKey="utilization" range={[20, 120]} />
                 <Tooltip
@@ -282,9 +282,9 @@ function DashboardPage() {
                   yAxisId="right"
                   orientation="right"
                   {...axisProps}
-                  tickFormatter={(v: number) => `$${formatCompact(v)}`}
+                  tickFormatter={formatCompactCurrency}
                 />
-                <Tooltip {...tooltipStyles} />
+                <Tooltip {...tooltipStyles} formatter={(value: number, name) => [name === "Avg cost" ? formatCurrency(value) : `${value} h`, String(name)]} />
                 <Bar
                   yAxisId="left"
                   dataKey="medianDuration"
