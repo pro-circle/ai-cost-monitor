@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppShell } from "@/components/layout/AppShell";
 import { Toaster } from "@/components/ui/sonner";
 import { FiltersProvider } from "@/lib/filters-store";
+import { MockDataProvider } from "@/lib/mock-data";
 
 function NotFoundComponent() {
   return (
@@ -118,6 +119,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <MockDataProvider>
       <FiltersProvider>
         <AppShell>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
@@ -125,6 +127,7 @@ function RootComponent() {
         </AppShell>
         <Toaster />
       </FiltersProvider>
+      </MockDataProvider>
     </QueryClientProvider>
   );
 }

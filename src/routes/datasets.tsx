@@ -5,6 +5,7 @@ import { useState } from "react";
 import { EmptyState, ErrorBlock, PageHeader, Panel, StatTile } from "@/components/common/Panel";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useMockData } from "@/lib/mock-data";
 import { cleanUpload, fetchDatasetMeta, fetchSampleDataset, profileUpload } from "@/lib/api/acg.functions";
 import { downloadText } from "@/lib/download";
 import { formatNumber } from "@/lib/format";
@@ -76,7 +77,8 @@ function ProfileView({ profile, headers, rows }: { profile: Profile; headers: st
 
 function DatasetsPage() {
   const [file, setFile] = useState<{ name: string; content: string } | null>(null);
-  const meta = useQuery({ queryKey: ["dataset-meta"], queryFn: () => fetchDatasetMeta() });
+  const mock = useMockData();
+  const meta = useQuery({ queryKey: ["dataset-meta"], queryFn: () => fetchDatasetMeta(), enabled: mock.loaded });
   const profile = useMutation({ mutationFn: (f: { name: string; content: string }) => profileUpload({ data: { fileName: f.name, content: f.content } }) });
   const sample = useMutation({ mutationFn: () => fetchSampleDataset({ data: { limit: 1000 } }) });
   const clean = useMutation({ mutationFn: (f: { name: string; content: string }) => cleanUpload({ data: { fileName: f.name, content: f.content } }) });
@@ -118,11 +120,15 @@ function DatasetsPage() {
             <input type="file" accept=".csv,.json,.tsv,.txt" className="sr-only" onChange={(e) => void onFile(e.target.files?.[0])} />
             Upload a file
           </label>
-          <Button variant="outline" onClick={() => void loadSample()} disabled={sample.isPending}>{sample.isPending ? "Loading…" : "Use sample dataset"}</Button>
+          <Button variant="outline" onClick={() => void loadSample()} disabled={sample.isPending || !mock.loaded} title={mock.loaded ? undefined : "Load mock data first"}>{sample.isPending ? "Loading…" : "Use sample dataset"}</Button>
           <Button onClick={() => file && clean.mutate(file)} disabled={!file || clean.isPending}>{clean.isPending ? "Cleaning…" : "Clean & add features"}</Button>
           {file ? <span className="text-xs text-muted-foreground">Loaded: <span className="font-mono">{file.name}</span></span> : null}
         </div>
-        {meta.data ? <p className="mt-3 text-xs text-muted-foreground">Built-in dataset: {JSON.stringify(meta.data).slice(0, 180)}</p> : null}
+        {mock.loaded && meta.data ? (
+          <p className="mt-3 text-xs text-muted-foreground">Mock dataset loaded: {meta.data.jobs.toLocaleString()} jobs · {meta.data.telemetry.toLocaleString()} telemetry points.</p>
+        ) : (
+          <p className="mt-3 text-xs text-muted-foreground">No mock data loaded — upload your own file, or press “Load Mock” at the top to use the sample dataset.</p>
+        )}
       </Panel>
 
       {profile.error ? <ErrorBlock error={profile.error} /> : null}
