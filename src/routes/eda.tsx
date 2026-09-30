@@ -8,7 +8,7 @@ import { NativeSelect } from "@/components/common/ConfigForm";
 import { ErrorBlock, LoadingBlock, PageHeader, Panel } from "@/components/common/Panel";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { fetchEda } from "@/lib/api/acg.functions";
-import { EDA_NUMERIC_FIELDS } from "@/lib/engine/analytics";
+import type { EDA_NUMERIC_FIELDS } from "@/lib/engine/analytics";
 import { filtersKey, useAcgFilters } from "@/lib/filters-store";
 import { formatNumber } from "@/lib/format";
 
