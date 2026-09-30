@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aicomputeguard
+      POSTGRES_USER: acg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U acg -d aicomputeguard"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ACG_DATABASE_URL: postgresql+psycopg://acg:${POSTGRES_PASSWORD:-change-me}@db:5432/aicomputeguard
+      ACG_CORS_ORIGINS: ${ACG_CORS_ORIGINS:-*}
+      ACG_SEED_JOBS: ${ACG_SEED_JOBS:-3000}
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:
