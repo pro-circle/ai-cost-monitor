@@ -29,7 +29,7 @@ type Report = Awaited<ReturnType<typeof fetchModels>>["costReports"][number];
 function Leaderboard({ title, reports }: { title: string; reports: Report[] }) {
   const selected = reports.find((r) => r.selected) ?? reports[0];
   return (
-    <Panel title={title} description={selected ? `Selected: ${selected.name}` : undefined}>
+    <Panel title={title} description={selected ? `Selected: ${selected.name}` : ""}>
       <Table>
         <TableHeader><TableRow><TableHead>Algorithm</TableHead><TableHead className="text-right">R²</TableHead><TableHead className="text-right">MAE</TableHead><TableHead className="text-right">RMSE</TableHead><TableHead className="text-right">MAPE</TableHead><TableHead className="text-right">Train / test</TableHead></TableRow></TableHeader>
         <TableBody>
