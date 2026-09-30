@@ -3,6 +3,7 @@ import { getDataset, getTelemetry } from "./dataset";
 import { applyFilters, type Filters } from "./filters";
 import { boxPlot, correlationMatrix, groupBy, histogram, linearFit, mean, quantile, summarize, sum } from "./stats";
 import { round } from "./random";
+import { formatCurrency } from "../format";
 import type { BillingRecord, GpuTypeId, TrainingJob, WorkloadType } from "./types";
 
 /* ------------------------------- small helpers ------------------------------- */
@@ -137,7 +138,7 @@ export function dashboardSummary(filters: Filters) {
       direction: "down-good",
       status: predictedMonthly <= prevPredictedMonthly ? "good" : "warn",
       sparkline: sparkline(current, window.fromMs, window.toMs, (s) => sum(s.map((j) => j.cost)) * (30 / spanDays) / 14),
-      hint: `Run-rate projection from $${round(dailyRate, 2).toLocaleString()}/day`,
+      hint: `Run-rate projection from ${formatCurrency(dailyRate)}/day`,
     },
     {
       key: "potential_savings",

@@ -6,6 +6,7 @@ import { optimizeConfiguration } from "./optimize";
 import { round } from "./random";
 import { groupBy, mean, sum } from "./stats";
 import type { Recommendation, WorkloadConfig } from "./types";
+import { formatCurrency } from "../format";
 
 function configFromJob(job: {
   gpuType: WorkloadConfig["gpuType"];
@@ -51,7 +52,7 @@ export function buildRecommendations(filters: Filters): Recommendation[] {
       id: "rec-low-utilization",
       category: "GPU utilization",
       title: `${lowUtil.length} workloads run below 45% GPU utilization`,
-      reason: `Mean utilization across these runs is ${(mean(lowUtil.map((j) => j.gpuUtilization)) * 100).toFixed(1)}%, and they represent ${((lowCost / totalCost) * 100).toFixed(1)}% of spend ($${round(lowCost, 2).toLocaleString()}).`,
+      reason: `Mean utilization across these runs is ${(mean(lowUtil.map((j) => j.gpuUtilization)) * 100).toFixed(1)}%, and they represent ${((lowCost / totalCost) * 100).toFixed(1)}% of spend (${formatCurrency(lowCost)}).`,
       expectedImpact: "Right-sizing device counts recovers idle GPU-hours without changing token throughput.",
       estimatedSavings: round(waste.buckets.find((b) => b.key === "low_utilization")?.waste ?? 0, 2),
       confidence: 0.86,
@@ -75,7 +76,7 @@ export function buildRecommendations(filters: Filters): Recommendation[] {
       id: "rec-precision",
       category: "Memory",
       title: `${fp32.length} runs still execute in FP32`,
-      reason: `FP32 halves tensor-core throughput and doubles activation bytes. Optimizing ${sample.length} sampled runs to BF16 yielded $${round(savings, 2).toLocaleString()} in modelled savings.`,
+      reason: `FP32 halves tensor-core throughput and doubles activation bytes. Optimizing ${sample.length} sampled runs to BF16 yielded ${formatCurrency(savings)} in modelled savings.`,
       expectedImpact: "BF16 keeps numerical range while roughly halving memory footprint per activation.",
       estimatedSavings: round(scaled, 2),
       confidence: 0.79,
@@ -93,7 +94,7 @@ export function buildRecommendations(filters: Filters): Recommendation[] {
       id: "rec-cost-concentration",
       category: "Cost",
       title: `${top3.length} workloads drive ${top3Share.toFixed(1)}% of total compute cost`,
-      reason: `${top3.map((j) => `${j.jobId} ($${j.cost.toLocaleString()})`).join(", ")} dominate spend in this window.`,
+      reason: `${top3.map((j) => `${j.jobId} (${formatCurrency(j.cost)})`).join(", ")} dominate spend in this window.`,
       expectedImpact: "Optimizing the heaviest runs first gives the largest absolute cost reduction per engineering hour.",
       estimatedSavings: round(sum(top3.map((j) => (optimizeConfiguration(configFromJob(j)).recommended?.savings ?? 0))), 2),
       confidence: 0.83,
@@ -108,7 +109,7 @@ export function buildRecommendations(filters: Filters): Recommendation[] {
     recs.push({
       id: "rec-failures",
       category: "Training",
-      title: `${failed.length} failed runs burned $${round(sum(failed.map((j) => j.cost)), 2).toLocaleString()}`,
+      title: `${failed.length} failed runs burned ${formatCurrency(sum(failed.map((j) => j.cost)))}`,
       reason: `Failure rate is ${((failed.length / current.length) * 100).toFixed(1)}% of workloads in this window; ${failed.filter((j) => j.retryOf).length} were retries of an earlier failed configuration.`,
       expectedImpact: "Pre-flight validation at reduced scale removes almost all of this spend.",
       estimatedSavings: round(sum(failed.map((j) => j.cost)) * 0.7, 2),
@@ -143,7 +144,7 @@ export function buildRecommendations(filters: Filters): Recommendation[] {
       id: "rec-gpu-mix",
       category: "Configuration",
       title: `${worst.gpuType} fleet scores ${worst.efficiencyScore} vs ${best.efficiencyScore} on ${best.gpuType}`,
-      reason: `${worst.gpuType} runs average ${worst.avgUtilization}% utilization at $${worst.spec.hourlyCost}/GPU-hour, versus ${best.avgUtilization}% on ${best.gpuType}.`,
+      reason: `${worst.gpuType} runs average ${worst.avgUtilization}% utilization at ${formatCurrency(worst.spec.hourlyCost)}/GPU-hour, versus ${best.avgUtilization}% on ${best.gpuType}.`,
       expectedImpact: "Migrating a share of the workload mix raises fleet-wide efficiency at equal throughput.",
       estimatedSavings: round(worst.cost * 0.12, 2),
       confidence: 0.68,
@@ -158,7 +159,7 @@ export function buildRecommendations(filters: Filters): Recommendation[] {
     recs.push({
       id: "rec-idle",
       category: "Cost",
-      title: `Idle GPU time costs $${idleWaste.waste.toLocaleString()} in this window`,
+      title: `Idle GPU time costs ${formatCurrency(idleWaste.waste)} in this window`,
       reason: `${idleWaste.jobs} workloads hold devices idle for more than 20% of wall-clock time.`,
       expectedImpact: "Queue packing and preemptible backfill convert idle capacity into useful work.",
       estimatedSavings: round(idleWaste.waste * 0.75, 2),
@@ -210,7 +211,7 @@ export function buildInsights(filters: Filters): { id: string; category: string;
   insights.push({
     id: "ins-concentration",
     category: "Cost",
-    text: `3 workloads are responsible for ${top3Share.toFixed(1)}% of total GPU cost ($${round(sum(sorted.slice(0, 3).map((j) => j.cost)), 2).toLocaleString()}).`,
+    text: `3 workloads are responsible for ${top3Share.toFixed(1)}% of total GPU cost (${formatCurrency(sum(sorted.slice(0, 3).map((j) => j.cost)))}).`,
     magnitude: top3Share,
   });
 
@@ -220,7 +221,7 @@ export function buildInsights(filters: Filters): { id: string; category: string;
     insights.push({
       id: "ins-anomaly",
       category: "Anomalies",
-      text: `Job ${worst.jobId} shows ${worst.metric.toLowerCase()} of ${worst.observed}${worst.unit} against an expected ${worst.expectedMin}${worst.unit}–${worst.expectedMax}${worst.unit} for comparable workloads.`,
+      text: `Job ${worst.jobId} shows ${worst.metric.toLowerCase()} of ${worst.unit === "₹" ? formatCurrency(worst.observed) : `${worst.observed}${worst.unit}`} against an expected ${worst.unit === "₹" ? `${formatCurrency(worst.expectedMin)}–${formatCurrency(worst.expectedMax)}` : `${worst.expectedMin}${worst.unit}–${worst.expectedMax}${worst.unit}`} for comparable workloads.`,
       magnitude: worst.estimatedWaste,
     });
   }
@@ -233,7 +234,7 @@ export function buildInsights(filters: Filters): { id: string; category: string;
       insights.push({
         id: "ins-optimize",
         category: "Optimization",
-        text: `Reducing ${bigJob.jobId} from ${bigJob.gpuCount} to ${opt.recommended.config.gpuCount} GPUs is estimated to save $${round(opt.recommended.savings, 2).toLocaleString()} per run (~$${round(monthly, 0).toLocaleString()}/month at daily cadence).`,
+        text: `Reducing ${bigJob.jobId} from ${bigJob.gpuCount} to ${opt.recommended.config.gpuCount} GPUs is estimated to save ${formatCurrency(opt.recommended.savings)} per run (~${formatCurrency(monthly)}/month at daily cadence).`,
         magnitude: opt.recommended.savings,
       });
     }
@@ -243,7 +244,7 @@ export function buildInsights(filters: Filters): { id: string; category: string;
   insights.push({
     id: "ins-forecast",
     category: "Forecast",
-    text: `At the current run-rate of $${ci.totals.dailySpend.toLocaleString()}/day, the next 30 days project to $${ci.totals.monthlySpend.toLocaleString()} (trend R² ${ci.totals.trendR2}).`,
+    text: `At the current run-rate of ${formatCurrency(ci.totals.dailySpend)}/day, the next 30 days project to ${formatCurrency(ci.totals.monthlySpend)} (trend R² ${ci.totals.trendR2}).`,
     magnitude: ci.totals.monthlySpend,
   });
 

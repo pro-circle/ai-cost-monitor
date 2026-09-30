@@ -104,7 +104,7 @@ function AnomaliesPage() {
                   <span className="ml-auto font-mono text-muted-foreground">score {a.score.toFixed(2)} · waste {formatCurrency(a.estimatedWaste)}</span>
                 </div>
                 <p className="mt-2 text-muted-foreground">
-                  {a.metric}: <span className="font-mono text-foreground">{a.observed}{a.unit}</span> (expected {a.expectedMin}–{a.expectedMax}{a.unit}). {a.explanation}
+                  {a.metric}: <span className="font-mono text-foreground">{a.unit === "₹" ? formatCurrency(a.observed) : `${a.observed}${a.unit}`}</span> (expected {a.unit === "₹" ? `${formatCurrency(a.expectedMin)}–${formatCurrency(a.expectedMax)}` : `${a.expectedMin}–${a.expectedMax}${a.unit}`}). {a.explanation}
                 </p>
                 <p className="mt-1"><span className="text-muted-foreground">Likely cause:</span> {a.likelyCause}</p>
                 <p className="mt-1"><span className="text-muted-foreground">Action:</span> {a.recommendation}</p>
