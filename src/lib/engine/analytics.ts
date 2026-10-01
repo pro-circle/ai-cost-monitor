@@ -3,7 +3,7 @@ import { getDataset, getTelemetry } from "./dataset";
 import { applyFilters, type Filters } from "./filters";
 import { boxPlot, correlationMatrix, groupBy, histogram, linearFit, mean, quantile, summarize, sum } from "./stats";
 import { round } from "./random";
-import { formatCurrency } from "../format";
+import { formatCurrency, INR_PER_USD } from "../format";
 import type { BillingRecord, GpuTypeId, TrainingJob, WorkloadType } from "./types";
 
 /* ------------------------------- small helpers ------------------------------- */
@@ -678,7 +678,7 @@ export function edaOverview(filters: Filters, x: EdaField = "gpuCount", y: EdaFi
     correlation: corr,
     scatter: { x, y, points: scatter, fit: { slope: round(fit.slope, 4), intercept: round(fit.intercept, 3), r2: round(fit.r2, 3) } },
     histograms: {
-      cost: histogram(current.map((j) => j.cost), 20).map((b) => ({ bin: b.from.toFixed(0), count: b.count })),
+      cost: histogram(current.map((j) => j.cost), 20).map((b) => ({ bin: `₹${Math.round(b.from * INR_PER_USD).toLocaleString("en-IN")}`, count: b.count })),
       utilization: utilizationHistogram(filters),
     },
     boxes,
