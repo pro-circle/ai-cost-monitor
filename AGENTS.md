@@ -14,3 +14,4 @@
 - `backend/` is a standalone FastAPI + SQLAlchemy service (SQLite locally, Postgres via docker-compose) mirroring the engine — user runs/tests it outside Lovable.
 - The app starts empty; mock data is served only when the `acg_mock=1` cookie is set by the "Load Mock" button — no database, and the setting stays per browser.
 - Keep demo cost calculations in their original units and convert all user-facing money to INR with one illustrative fixed rate in the shared formatter — avoids inconsistent totals, filters, charts, and insights.
+- Vercel builds use nitro preset `vercel` (set only when VERCEL env is present) and vercel.json — keeps Lovable hosting on its default target.
