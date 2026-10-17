@@ -7,7 +7,7 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 // On Vercel, build the server for Vercel's runtime instead of the default target.
-const isVercel = !!process.env.VERCEL;
+const isVercel = !!process.env["VERCEL"];
 
 export default defineConfig({
   tanstackStart: {
