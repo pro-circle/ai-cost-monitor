@@ -83,5 +83,11 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^8.2.0"
+  },
+  "overrides": {
+    "@tanstack/react-start": "1.168.60"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
